@@ -1,0 +1,12 @@
+import numpy as np
+from sklearn import mixture
+g = mixture.GaussianMixture(n_components=2,covariance_type='diag')
+obs = np.concatenate((np.random.randn(100, 5),10 + np.random.randn(300, 5)))
+g.fit(obs)
+print g.weights_
+print g.means_
+print g.covariances_
+a=np.array([10,11,12,9,8])
+print g.predict(a.reshape(1,-1))[0]
+#print g.score_samples([[0], [2], [9], [10]])
+print g.converged_

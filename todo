@@ -1,0 +1,22 @@
+todo:
+
+
+problem:
+1. 抽取的substroke不好(太长的连笔无法分开,太短的目前淘汰方法不对)
+
+done:
+1. 重写了存储数据的结构,以前的无法统计empirical count
+2. scale加进了聚类
+3. 重写substroke抽取时的逻辑
+       3.1 绝对速度足够慢=>相对速度
+       3.2 绝对点数足够多=>笔画展开的长度足够长
+       3.3 十分短的stroke(如"点")直接记为一个substroke
+
+notice:
+1. min_len控制抽取的substroke最小长度,太短则会出现很多碎片;太长则一段stroke的很多部分(甚至整个stroke)都会被丢弃掉
+2. pause_rate控制如何取"停点",太小则"停点"很少,不能很好的分开长笔画;太大则出现的"停点"很多,可能导致碎片化、stroke丢段
+
+problem:
+MLE for Gaussian 被 GMM 每个cluster的参数替代了
+GMM不收敛,加大maxiter,已解决
+针对每个cluster,plot出一些x看效果
