@@ -1,12 +1,10 @@
 import os
-
-from sklearn import mixture
-
-from bspline.bspline import *
 from empirical import num_of_strokes
 from normlize import data_normlize, substroke_normlize
 from plot.plot_utils import *
-from mle import gammamle
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import interpolate
 
 print "PWD="+os.path.abspath(".")
 
@@ -83,12 +81,69 @@ for line in infile:
     loopid += 1
 data.append(char)
 print "character="+str(len(data))+", each character has "+str(len(data[0]))+" samples"
-data_normlize.normlize_data(data)
+data_normlize.normlize_data(data=data,size=80)
 
-if True:
+#CHECKPOINT1: check strokes
+checkpoint1=True
+if checkpoint1:
     start=0
     end=10
     stk_per_char=10
     tmp=data[start:end][:stk_per_char]
     plot_multi_strokes(tmp,pause_dis)
     os._exit(1)
+
+
+
+def linear_interpolate(substroke,norm_dis,plot=False):
+    substroke = np.array(substroke)
+    dis = substroke[:, 3]
+    dis[0] = 0
+    cumdis = np.cumsum(dis)
+    start_dis = cumdis[0]
+    end_dis = cumdis[-1]
+    x = cumdis[:]
+    nint = max(round(end_dis / norm_dis), 2)
+    xi = np.linspace(start_dis, end_dis, nint)
+    f_linear1 = interpolate.interp1d(x, substroke[:, 0])
+    f_linear2 = interpolate.interp1d(x, substroke[:, 1])
+    y1 = f_linear1(xi)
+    y2 = f_linear2(xi)
+    yi = np.array([y1, y2]).transpose()
+    return yi
+
+num_char=20
+offset1=0
+sample_each_char=1
+offset2=0
+thickness=2
+
+for i in range(num_char):
+    for j in range(sample_each_char):
+        imgarray=np.ones([105,105],dtype=np.int)
+        strokes=data[i+offset1][j+offset2]
+        for stroke in strokes:
+            #raw_input('stroke:')
+            #print stroke
+            output=np.round(linear_interpolate(stroke,1))
+            #raw_input('output:')
+            #print output
+            for k in range(len(output)):
+                tmpx=output[k,0]+53
+                tmpy=output[k,1]+53
+                x1 = np.int(tmpx) - thickness
+                x2 = np.int(tmpx) + thickness
+                y1 = np.int(tmpy) - thickness
+                y2 = np.int(tmpy) + thickness
+                imgarray[y1:y2,x1:x2] = 0
+                print tmpx,tmpy
+        #print imgarray
+        np.savetxt("../data/images/image"+str(i+offset1)+'-'+str(j+offset2)+".txt", fmt='%d',X=imgarray)
+
+
+
+
+
+
+
+
